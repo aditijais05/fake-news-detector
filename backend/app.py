@@ -25,8 +25,11 @@ CORS(app, resources={r"/*": {"origins": [
     "https://*.vercel.app"
 ]}})
 
-model = pickle.load(open("model/model.pkl", "rb"))
-vectorizer = pickle.load(open("model/vectorizer.pkl", "rb"))
+# ✅ FIX: Use absolute path (important for deployment)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+model = pickle.load(open(os.path.join(BASE_DIR, "model/model.pkl"), "rb"))
+vectorizer = pickle.load(open(os.path.join(BASE_DIR, "model/vectorizer.pkl"), "rb"))
 
 
 @app.route('/health', methods=['GET'])
@@ -108,11 +111,12 @@ def feedback():
         "correct": request.json['correct'],
         "timestamp": time.time()
     }
-    with open("feedback_log.jsonl", "a", encoding="utf-8") as f:
+    with open(os.path.join(BASE_DIR, "feedback_log.jsonl"), "a", encoding="utf-8") as f:
         f.write(json.dumps(entry) + "\n")
     return jsonify({"status": "saved"}), 200
 
 
+# ❌ DO NOT REMOVE — still useful locally
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
