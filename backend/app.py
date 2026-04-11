@@ -5,6 +5,7 @@ from utils.explain import get_explanation
 from transformers import pipeline
 import time
 import os
+import sys
 
 bert_model = None
 
@@ -68,10 +69,11 @@ def predict():
     ensemble_fake_prob = (lr_fake_prob * 0.35) + (bert_fake_prob * 0.65)
     ensemble_confidence = round(max(ensemble_fake_prob, 1 - ensemble_fake_prob) * 100, 2)
 
-    print(f"DEBUG lr_proba: {lr_proba}")
-    print(f"DEBUG bert_raw_label: {bert_raw_label}, score: {bert_result['score']}")
-    print(f"DEBUG lr_fake_prob: {lr_fake_prob}, bert_fake_prob: {bert_fake_prob}")
-    print(f"DEBUG ensemble_fake_prob: {ensemble_fake_prob}")
+    print(f"DEBUG lr_proba: {lr_proba}", flush=True)
+    print(f"DEBUG bert_raw_label: {bert_raw_label}, score: {bert_result['score']}", flush=True)
+    print(f"DEBUG lr_fake_prob: {lr_fake_prob}, bert_fake_prob: {bert_fake_prob}", flush=True)
+    print(f"DEBUG ensemble_fake_prob: {ensemble_fake_prob}", flush=True)
+    sys.stdout.flush()
 
     if ensemble_fake_prob > 0.65:
         final_verdict = "Fake"
