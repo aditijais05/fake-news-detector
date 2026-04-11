@@ -22,10 +22,7 @@ def get_bert_model():
     return bert_model
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": [
-    "http://localhost:3000",
-    "https://*.vercel.app"
-]}}, supports_credentials=True)
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=False)
 
 import os
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
