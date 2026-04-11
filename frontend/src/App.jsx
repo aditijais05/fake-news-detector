@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Analytics } from "@vercel/analytics/react";
 import { analyzeNews } from "./api";
 import ResultCard from "./components/ResultCard";
 import "./App.css";
@@ -44,6 +45,8 @@ function App() {
       {error && <p className="error">{error}</p>}
 
       {result && <ResultCard result={result} />}
+      
+      <Analytics />
     </div>
   );
 }
