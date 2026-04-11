@@ -7,12 +7,19 @@ from transformers import pipeline
 import time
 import os
 
-bert_model = pipeline(
-    "text-classification",
-    model="hamzab/roberta-fake-news-classification",
-    truncation=True,
-    max_length=512
-)
+# Lazy load - model loads only on first request
+bert_model = None
+
+def get_bert_model():
+    global bert_model
+    if bert_model is None:
+        bert_model = pipeline(
+            "text-classification",
+            model="hamzab/roberta-fake-news-classification",
+            truncation=True,
+            max_length=512
+        )
+    return bert_model
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": [
@@ -45,7 +52,7 @@ def predict():
     lr_confidence = lr_proba.max()
     lr_label = "Real" if lr_pred == 1 else "Fake"
 
-    bert_result = bert_model(data[:512])[0]
+    bert_result = get_bert_model()(data[:512])[0]
     bert_raw_label = bert_result['label']
     bert_confidence = round(bert_result['score'] * 100, 2)
     bert_label = "Real" if bert_raw_label == "LABEL_1" else "Fake"
