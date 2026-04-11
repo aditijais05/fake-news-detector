@@ -1,13 +1,11 @@
 from flask import Flask, request, jsonify
 import pickle
-from flask_cors import CORS
 from utils.preprocess import clean_text
 from utils.explain import get_explanation
 from transformers import pipeline
 import time
 import os
 
-# Lazy load - model loads only on first request
 bert_model = None
 
 def get_bert_model():
@@ -22,19 +20,28 @@ def get_bert_model():
     return bert_model
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=False)
 
-import os
+@app.after_request
+def add_cors_headers(response):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+    return response
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 model = pickle.load(open(os.path.join(BASE_DIR, "model", "model.pkl"), "rb"))
 vectorizer = pickle.load(open(os.path.join(BASE_DIR, "model", "vectorizer.pkl"), "rb"))
 
-@app.route('/health', methods=['GET'])
+@app.route('/health', methods=['GET', 'OPTIONS'])
 def health():
+    if request.method == 'OPTIONS':
+        return jsonify({}), 200
     return jsonify({"status": "ok", "models": ["Logistic Regression", "RoBERTa"]}), 200
 
-@app.route('/predict', methods=['POST'])
+@app.route('/predict', methods=['POST', 'OPTIONS'])
 def predict():
+    if request.method == 'OPTIONS':
+        return jsonify({}), 200
     start_time = time.time()
     if not request.json or 'text' not in request.json:
         return jsonify({"error": "Missing required field: 'text'"}), 400
@@ -81,8 +88,10 @@ def predict():
         "meta": {"processing_time_ms": elapsed_ms, "text_length": len(data)}
     }), 200
 
-@app.route('/feedback', methods=['POST'])
+@app.route('/feedback', methods=['POST', 'OPTIONS'])
 def feedback():
+    if request.method == 'OPTIONS':
+        return jsonify({}), 200
     if not request.json:
         return jsonify({"error": "Missing JSON body"}), 400
     required = ['text', 'predicted', 'correct']
