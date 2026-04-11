@@ -66,7 +66,7 @@ function ResultCard({ result }) {
       <div
         dangerouslySetInnerHTML={{
           __html: highlightText(
-            result.original_text,
+            result.original_text || "",
             explanation.suspicious_phrases || []
           ),
         }}
