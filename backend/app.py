@@ -63,10 +63,15 @@ def predict():
     bert_confidence = round(bert_result['score'] * 100, 2)
     bert_label = "Real" if bert_raw_label == "REAL" else "Fake"
 
-    lr_fake_prob = lr_proba[0]  
+    lr_fake_prob = lr_proba[0]
     bert_fake_prob = bert_result['score'] if bert_raw_label == "FAKE" else (1 - bert_result['score'])
     ensemble_fake_prob = (lr_fake_prob * 0.35) + (bert_fake_prob * 0.65)
     ensemble_confidence = round(max(ensemble_fake_prob, 1 - ensemble_fake_prob) * 100, 2)
+
+    print(f"DEBUG lr_proba: {lr_proba}")
+    print(f"DEBUG bert_raw_label: {bert_raw_label}, score: {bert_result['score']}")
+    print(f"DEBUG lr_fake_prob: {lr_fake_prob}, bert_fake_prob: {bert_fake_prob}")
+    print(f"DEBUG ensemble_fake_prob: {ensemble_fake_prob}")
 
     if ensemble_fake_prob > 0.65:
         final_verdict = "Fake"
