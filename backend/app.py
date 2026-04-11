@@ -13,7 +13,7 @@ def get_bert_model():
     if bert_model is None:
         bert_model = pipeline(
             "text-classification",
-            model="hamzab/roberta-fake-news-classification",
+            model="mrm8488/bert-tiny-finetuned-fake-news-detection",
             truncation=True,
             max_length=512
         )
@@ -36,7 +36,7 @@ vectorizer = pickle.load(open(os.path.join(BASE_DIR, "model", "vectorizer.pkl"),
 def health():
     if request.method == 'OPTIONS':
         return jsonify({}), 200
-    return jsonify({"status": "ok", "models": ["Logistic Regression", "RoBERTa"]}), 200
+    return jsonify({"status": "ok", "models": ["Logistic Regression", "BERT-Tiny"]}), 200
 
 @app.route('/predict', methods=['POST', 'OPTIONS'])
 def predict():
@@ -61,10 +61,10 @@ def predict():
     bert_result = get_bert_model()(data[:512])[0]
     bert_raw_label = bert_result['label']
     bert_confidence = round(bert_result['score'] * 100, 2)
-    bert_label = "Real" if bert_raw_label == "LABEL_1" else "Fake"
+    bert_label = "Real" if bert_raw_label == "REAL" else "Fake"
 
     lr_fake_prob = lr_proba[0] if lr_pred == 0 else (1 - lr_confidence)
-    bert_fake_prob = bert_result['score'] if bert_raw_label == "LABEL_0" else (1 - bert_result['score'])
+    bert_fake_prob = bert_result['score'] if bert_raw_label == "FAKE" else (1 - bert_result['score'])
     ensemble_fake_prob = (lr_fake_prob * 0.35) + (bert_fake_prob * 0.65)
     ensemble_confidence = round(max(ensemble_fake_prob, 1 - ensemble_fake_prob) * 100, 2)
 
