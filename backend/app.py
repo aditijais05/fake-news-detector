@@ -27,8 +27,10 @@ CORS(app, resources={r"/*": {"origins": [
     "https://*.vercel.app"
 ]}}, supports_credentials=True)
 
-model = pickle.load(open("model/model.pkl", "rb"))
-vectorizer = pickle.load(open("model/vectorizer.pkl", "rb"))
+import os
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+model = pickle.load(open(os.path.join(BASE_DIR, "model", "model.pkl"), "rb"))
+vectorizer = pickle.load(open(os.path.join(BASE_DIR, "model", "vectorizer.pkl"), "rb"))
 
 @app.route('/health', methods=['GET'])
 def health():
